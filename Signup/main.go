@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/mail"
-	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -36,10 +35,9 @@ type Response struct {
 
 // This struct will be used to decode the data from the database
 type Email_Subscribe struct {
-	User       string `bson:"user,omitempty"`
-	Email      string `bson:"email,omitempty"`
-	Password   string `bson:"password,omitempty"`
-	High_Score int    `bson:"high_score,omitempty"`
+	User     string `bson:"user,omitempty"`
+	Email    string `bson:"email,omitempty"`
+	Password string `bson:"password,omitempty"`
 }
 
 // Creates a context for the Lambda
@@ -57,7 +55,7 @@ func (s *Server) handler(request events.APIGatewayWebsocketProxyRequest) (events
 	}
 
 	//Parses the Email from the post request to check if its valid
-	_, err = mail.ParseAddress(strings.ToUpper(req.Email))
+	_, err = mail.ParseAddress(req.Email)
 	if err != nil {
 		//Returns a error response to the client
 		return ResponseReturn("invalid email input", 400), nil
@@ -68,10 +66,9 @@ func (s *Server) handler(request events.APIGatewayWebsocketProxyRequest) (events
 	mailingDB := apiDatabase.Collection("Users")
 
 	email := Email_Subscribe{
-		User:       req.User,
-		Email:      req.Email,
-		Password:   req.Password,
-		High_Score: 0,
+		User:     req.User,
+		Email:    req.Email,
+		Password: req.Password,
 	}
 
 	var result_user Email_Subscribe
@@ -91,7 +88,7 @@ func (s *Server) handler(request events.APIGatewayWebsocketProxyRequest) (events
 
 func main() {
 	//This is the connection string to the database
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://School:Shadi1973@school.q6mrlky.mongodb.net/?retryWrites=true&w=majorityy"))
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://School:Shadi1973@school.ix1gx2g.mongodb.net/?retryWrites=true&w=majority"))
 	if err != nil {
 		log.Fatal(err)
 	}
