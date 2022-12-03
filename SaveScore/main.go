@@ -7,8 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"net/mail"
-	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -24,7 +22,7 @@ type Server struct {
 
 // This will take the input Post request and decode it into a struct
 type Requests struct {
-	Email string `json:"email"`
+	Email string `json:"user"`
 	Score string `json:"score"`
 }
 
@@ -35,7 +33,7 @@ type Response struct {
 
 // This struct will be used to decode the data from the database
 type Score_Save struct {
-	Email string `bson:"email,omitempty"`
+	Email string `bson:"user,omitempty"`
 	Score string `bson:"recent_score,omitempty"`
 }
 
@@ -53,13 +51,6 @@ func (s *Server) handler(request events.APIGatewayWebsocketProxyRequest) (events
 		return events.APIGatewayProxyResponse{}, err
 	}
 
-	//Parses the Email from the post request to check if its valid
-	_, err = mail.ParseAddress(strings.ToUpper(req.Email))
-	if err != nil {
-		//Returns a error response to the client
-		return ResponseReturn("invalid email input", 400), nil
-	}
-
 	//This is the database that we are using
 	apiDatabase := s.client.Database("School")
 	scoreDB := apiDatabase.Collection("Scores")
@@ -70,9 +61,9 @@ func (s *Server) handler(request events.APIGatewayWebsocketProxyRequest) (events
 	}
 
 	var result_user Score_Save
-	err = scoreDB.FindOne(ctx, bson.D{{Key: "email", Value: req.Email}}, nil).Decode(&result_user)
+	err = scoreDB.FindOne(ctx, bson.D{{Key: "user", Value: req.Email}}, nil).Decode(&result_user)
 	if err == nil {
-		filter := bson.D{{"email", req.Email}}
+		filter := bson.D{{"user", req.Email}}
 		update := bson.D{{"$set", bson.D{{"recent_score", req.Score}}}}
 		_, err = scoreDB.UpdateOne(context.TODO(), filter, update)
 		if err != nil {
