@@ -32,10 +32,8 @@ type Response struct {
 
 // This struct will be used to decode the data from the database
 type Email_Subscribe struct {
-	User       string `bson:"user,omitempty"`
-	Email      string `bson:"email,omitempty"`
-	Password   string `bson:"password,omitempty"`
-	High_Score int    `bson:"high_score,omitempty"`
+	Email    string `bson:"email,omitempty"`
+	Password string `bson:"password,omitempty"`
 }
 
 // Creates a context for the Lambda
@@ -66,8 +64,7 @@ func (s *Server) handler(request events.APIGatewayWebsocketProxyRequest) (events
 	var result_user Email_Subscribe
 	err = mailingDB.FindOne(ctx, bson.D{{Key: "email", Value: req.Email}}, nil).Decode(&result_user)
 	if err == nil {
-		err = mailingDB.FindOne(ctx, bson.D{{Key: "password", Value: req.Password}}, nil).Decode(&result_user)
-		if err == nil {
+		if req.Password == result_user.Password {
 			return ResponseReturn("Login successfull", 200), nil
 		}
 	}
@@ -79,7 +76,7 @@ func (s *Server) handler(request events.APIGatewayWebsocketProxyRequest) (events
 
 func main() {
 	//This is the connection string to the database
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://School:Shadi1973@school.q6mrlky.mongodb.net/?retryWrites=true&w=majorityy"))
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://School:Shadi1973@school.ix1gx2g.mongodb.net/?retryWrites=true&w=majority"))
 	if err != nil {
 		log.Fatal(err)
 	}
